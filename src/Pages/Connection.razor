@@ -2,4 +2,21 @@
 
 <h1>Connection</h1>
 
-TODO
+<button type="button" class="btn btn-primary" disabled="@(Connected)" @onclick="Connect">Connect</button>
+<button type="button" class="btn btn-secondary" disabled="@(!Connected)" @onclick="Disconnect">Disconnect</button>
+
+@code {
+
+    public bool Connected { get; set; } = false;
+
+    public void Connect()
+    {
+        Connected = true;
+    }
+
+    public void Disconnect()
+    {
+        Connected = false;
+    }
+
+}
