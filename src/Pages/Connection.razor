@@ -1,22 +1,26 @@
 @page "/connection"
+@using Services
+@inject IMqttService MqttService
 
 <h1>Connection</h1>
 
 <button type="button" class="btn btn-primary" disabled="@(Connected)" @onclick="Connect">Connect</button>
-<button type="button" class="btn btn-secondary" disabled="@(!Connected)" @onclick="Disconnect">Disconnect</button>
+<button type="button" class="btn btn-secondary" disabled="@(!Connected)" @onclick="DisconnectAsync">Disconnect</button>
 
 @code {
 
     public bool Connected { get; set; } = false;
 
-    public void Connect()
+    public async Task Connect()
     {
-        Connected = true;
+        await MqttService.ConnectAsync();
+        Connected = MqttService.Connected;
     }
 
-    public void Disconnect()
+    public async Task DisconnectAsync()
     {
-        Connected = false;
+        await MqttService.DisconnectAsync();
+        Connected = MqttService.Connected;
     }
 
 }
