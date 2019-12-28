@@ -1,5 +1,44 @@
 @page "/subscribe"
+@using Services
+@inject IMqttService MqttService
 
 <h1>Subscribe</h1>
 
-TODO
+<input type="text" placeholder="Topic" @bind="NewTopic" />
+<button @onclick="SubscribeNewTopicAsync">Subscribe</button>
+
+<h2>Received messages</h2>
+
+<ul class="list-group">
+    @foreach (var message in Messages)
+    {
+        <li class="list-group-item">@message</li>
+    }
+</ul>
+
+@code
+{
+    public string NewTopic { get; set; }
+
+    public List<string> Messages { get; private set; } = new List<string>();
+
+    public async Task SubscribeNewTopicAsync()
+    {
+        await MqttService.SubscribeAsync(NewTopic);
+    }
+
+    protected override void OnInitialized()
+    {
+        MqttService.OnMessageReceived += () => InvokeAsync(() => ReloadMessages());
+    }
+
+    private void ReloadMessages()
+    {
+        Messages = MqttService.ReceivedMessages
+            .TakeLast(10)
+            .Select(m => System.Text.Encoding.UTF8.GetString(m.Payload))
+            .ToList();
+
+        StateHasChanged();
+    }
+}
