@@ -15,7 +15,7 @@ namespace MQTTrace.Services
         bool Connected { get; }
         Task SubscribeAsync(string topic);
         List<MqttApplicationMessage> ReceivedMessages { get; }
-        event Action OnMessageReceived;
+        event Func<Task> MessageReceived;
     }
 
     public class MqttService : IMqttService
@@ -57,9 +57,9 @@ namespace MQTTrace.Services
         private void HandleApplicationMessagereceived(MqttApplicationMessageReceivedEventArgs args)
         {
             ReceivedMessages.Add(args.ApplicationMessage);
-            OnMessageReceived?.Invoke();
+            MessageReceived?.Invoke();
         }
 
-        public event Action OnMessageReceived;
+        public event Func<Task> MessageReceived;
     }
 }

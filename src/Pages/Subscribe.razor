@@ -1,6 +1,7 @@
 @page "/subscribe"
 @using Services
 @inject IMqttService MqttService
+@implements IDisposable
 
 <h1>Subscribe</h1>
 
@@ -29,16 +30,25 @@
 
     protected override void OnInitialized()
     {
-        MqttService.OnMessageReceived += () => InvokeAsync(() => ReloadMessages());
+        MqttService.MessageReceived += ReloadMessages;
     }
 
-    private void ReloadMessages()
+    private async Task ReloadMessages()
     {
-        Messages = MqttService.ReceivedMessages
-            .TakeLast(10)
-            .Select(m => System.Text.Encoding.UTF8.GetString(m.Payload))
-            .ToList();
+        await InvokeAsync(() =>
+        {
+            Messages = MqttService.ReceivedMessages
+                .TakeLast(10)
+                .Select(m => System.Text.Encoding.UTF8.GetString(m.Payload))
+                .ToList();
 
-        StateHasChanged();
+            StateHasChanged();
+
+        });
+    }
+
+    public void Dispose()
+    {
+        MqttService.MessageReceived -= ReloadMessages;
     }
 }
