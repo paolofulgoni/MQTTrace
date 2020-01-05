@@ -1,5 +1,6 @@
 @page "/subscribe"
 @using Services
+@using Models
 @inject IMqttService MqttService
 @implements IDisposable
 
@@ -10,18 +11,31 @@
 
 <h2>Received messages</h2>
 
-<ul class="list-group">
-    @foreach (var message in Messages)
-    {
-        <li class="list-group-item">@message</li>
-    }
-</ul>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Topic</th>
+            <th scope="col">Timestamp</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var message in Messages)
+        {
+            <tr>
+                <th scope="row">@(message.ReceptionIndex)</th>
+                <td>@(message.Message.Topic)</td>
+                <td>@(message.ReceptionTimestamp)</td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code
 {
     public string NewTopic { get; set; }
 
-    public List<string> Messages { get; private set; } = new List<string>();
+    public List<ReceivedMessage> Messages { get; private set; } = new List<ReceivedMessage>();
 
     public async Task SubscribeNewTopicAsync()
     {
@@ -39,7 +53,6 @@
         {
             Messages = MqttService.ReceivedMessages
                 .TakeLast(10)
-                .Select(m => System.Text.Encoding.UTF8.GetString(m.Payload))
                 .ToList();
 
             StateHasChanged();

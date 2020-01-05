@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Options;
+using MQTTrace.Models;
 
 namespace MQTTrace.Services
 {
@@ -14,13 +16,14 @@ namespace MQTTrace.Services
         Task DisconnectAsync();
         bool Connected { get; }
         Task SubscribeAsync(string topic);
-        List<MqttApplicationMessage> ReceivedMessages { get; }
+        List<ReceivedMessage> ReceivedMessages { get; }
         event Func<Task> MessageReceived;
     }
 
     public class MqttService : IMqttService
     {
         private readonly IMqttClient mqttClient;
+        private int lastReceptionIndex = 0;
 
         public MqttService(IMqttClient mqttClient)
         {
@@ -52,11 +55,19 @@ namespace MQTTrace.Services
             await mqttClient.SubscribeAsync(topic);
         }
 
-        public List<MqttApplicationMessage> ReceivedMessages { get; } = new List<MqttApplicationMessage>();
+        public List<ReceivedMessage> ReceivedMessages { get; } = new List<ReceivedMessage>();
 
         private void HandleApplicationMessagereceived(MqttApplicationMessageReceivedEventArgs args)
         {
-            ReceivedMessages.Add(args.ApplicationMessage);
+            var currentIndex = Interlocked.Increment(ref lastReceptionIndex);
+
+            ReceivedMessages.Add(new ReceivedMessage
+            {
+                ReceptionIndex = currentIndex,
+                ReceptionTimestamp = DateTime.Now,
+                Message = args.ApplicationMessage,
+                ClientId = args.ClientId,
+            });
             MessageReceived?.Invoke();
         }
 
