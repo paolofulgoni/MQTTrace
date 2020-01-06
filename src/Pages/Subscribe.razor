@@ -1,6 +1,7 @@
 @page "/subscribe"
 @using Services
 @using Models
+@using System.Text
 @inject IMqttService MqttService
 @implements IDisposable
 
@@ -11,7 +12,7 @@
 
 <h2>Received messages</h2>
 
-<table class="table table-sm">
+<table class="table table-sm table-hover">
     <thead>
         <tr>
             <th scope="col">#</th>
@@ -22,7 +23,7 @@
     <tbody>
         @foreach (var message in Messages)
         {
-            <tr>
+            <tr @onclick="@(e => UpdateSelectedMessage(e, message.MessageId))">
                 <th scope="row">@(message.MessageId)</th>
                 <td>@(message.Message.Topic)</td>
                 <td>@(message.Timestamp)</td>
@@ -31,11 +32,17 @@
     </tbody>
 </table>
 
+<h2>Selected message details</h2>
+
+Content: @(SelectedMessage != null ? Encoding.UTF8.GetString(SelectedMessage.Message.Payload) : "")
+
 @code
 {
     public string NewTopic { get; set; }
 
     public List<ReceivedMessage> Messages { get; private set; } = new List<ReceivedMessage>();
+
+    public ReceivedMessage SelectedMessage = null;
 
     public async Task SubscribeNewTopicAsync()
     {
@@ -58,6 +65,11 @@
             StateHasChanged();
 
         });
+    }
+
+    private void UpdateSelectedMessage(MouseEventArgs e, int messageId)
+    {
+        SelectedMessage = Messages.Find(m => m.MessageId == messageId);
     }
 
     public void Dispose()
