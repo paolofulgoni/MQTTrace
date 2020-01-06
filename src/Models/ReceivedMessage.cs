@@ -8,9 +8,9 @@ namespace MQTTrace.Models
 {
     public class ReceivedMessage
     {
-        public int ReceptionIndex { get; set; }
-        public DateTime ReceptionTimestamp { get; set; }
-        public MqttApplicationMessage Message { get; set; }
+        public int MessageId { get; set; }
+        public DateTime Timestamp { get; set; }
         public string ClientId { get; set; }
+        public MqttApplicationMessage Message { get; set; }
     }
 }

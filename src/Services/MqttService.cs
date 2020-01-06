@@ -23,7 +23,7 @@ namespace MQTTrace.Services
     public class MqttService : IMqttService
     {
         private readonly IMqttClient mqttClient;
-        private int lastReceptionIndex = 0;
+        private int lastMessageId = -1;
 
         public MqttService(IMqttClient mqttClient)
         {
@@ -59,14 +59,14 @@ namespace MQTTrace.Services
 
         private void HandleApplicationMessagereceived(MqttApplicationMessageReceivedEventArgs args)
         {
-            var currentIndex = Interlocked.Increment(ref lastReceptionIndex);
+            var messageId = Interlocked.Increment(ref lastMessageId);
 
             ReceivedMessages.Add(new ReceivedMessage
             {
-                ReceptionIndex = currentIndex,
-                ReceptionTimestamp = DateTime.Now,
-                Message = args.ApplicationMessage,
+                MessageId = messageId,
+                Timestamp = DateTime.Now,
                 ClientId = args.ClientId,
+                Message = args.ApplicationMessage,
             });
             MessageReceived?.Invoke();
         }

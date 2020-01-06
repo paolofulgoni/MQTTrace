@@ -23,9 +23,9 @@
         @foreach (var message in Messages)
         {
             <tr>
-                <th scope="row">@(message.ReceptionIndex)</th>
+                <th scope="row">@(message.MessageId)</th>
                 <td>@(message.Message.Topic)</td>
-                <td>@(message.ReceptionTimestamp)</td>
+                <td>@(message.Timestamp)</td>
             </tr>
         }
     </tbody>
