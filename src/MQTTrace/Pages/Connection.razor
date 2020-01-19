@@ -4,23 +4,19 @@
 
 <h1>Connection</h1>
 
-<button type="button" class="btn btn-primary" disabled="@(Connected)" @onclick="Connect">Connect</button>
-<button type="button" class="btn btn-secondary" disabled="@(!Connected)" @onclick="DisconnectAsync">Disconnect</button>
+<button type="button" class="btn btn-primary" disabled="@(MqttService.Connected)" @onclick="Connect">Connect</button>
+<button type="button" class="btn btn-secondary" disabled="@(!MqttService.Connected)" @onclick="DisconnectAsync">Disconnect</button>
 
 @code {
-
-    public bool Connected { get; set; } = false;
 
     public async Task Connect()
     {
         await MqttService.ConnectAsync();
-        Connected = MqttService.Connected;
     }
 
     public async Task DisconnectAsync()
     {
         await MqttService.DisconnectAsync();
-        Connected = MqttService.Connected;
     }
 
 }
