@@ -40,7 +40,7 @@ Content: @(SelectedMessage != null ? Encoding.UTF8.GetString(SelectedMessage.Mes
 {
     public string NewTopic { get; set; }
 
-    public List<ReceivedMessage> Messages { get; private set; } = new List<ReceivedMessage>();
+    public List<ReceivedMessage> Messages { get; private set; }
 
     public ReceivedMessage SelectedMessage = null;
 
@@ -51,6 +51,10 @@ Content: @(SelectedMessage != null ? Encoding.UTF8.GetString(SelectedMessage.Mes
 
     protected override void OnInitialized()
     {
+        Messages = MqttService.ReceivedMessages
+                .TakeLast(10)
+                .ToList();
+
         MqttService.MessageReceived += ReloadMessages;
     }
 
