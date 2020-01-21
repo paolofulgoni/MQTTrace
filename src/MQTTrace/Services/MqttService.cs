@@ -18,6 +18,8 @@ namespace MQTTrace.Services
         Task SubscribeAsync(string topic);
         List<ReceivedMessage> ReceivedMessages { get; }
         event Func<Task> MessageReceived;
+        Task PublishAsync(string topic, string payload);
+
     }
 
     public class MqttService : IMqttService
@@ -72,5 +74,10 @@ namespace MQTTrace.Services
         }
 
         public event Func<Task> MessageReceived;
+
+        public async Task PublishAsync(string topic, string payload)
+        {
+            await mqttClient.PublishAsync(topic, payload);
+        }
     }
 }

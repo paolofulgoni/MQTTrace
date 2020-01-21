@@ -1,5 +1,38 @@
 @page "/publish"
+@inject IMqttService MqttService
 
 <h1>Publish</h1>
 
-TODO
+<div>
+    <input type="text" placeholder="Topic" @bind="Topic" />
+</div>
+
+<div>
+    <textarea placeholder="Payload" @bind="Payload" />
+</div>
+
+<button @onclick="PublishAsync" disabled="@(Sending)">
+    @if (Sending)
+    {
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+    }
+    Publish
+</button>
+
+@code
+{
+    public string Topic { get; set; }
+
+    public string Payload { get; set; }
+
+    public bool Sending { get; set; }
+
+    public async Task PublishAsync()
+    {
+        Sending = true;
+
+        await MqttService.PublishAsync(Topic, Payload);
+
+        Sending = false;
+    }
+}
