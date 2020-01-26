@@ -1,10 +1,8 @@
 @page "/connection"
 @inject IMqttService MqttService
 
-<h1>Connection</h1>
-
-<button type="button" class="btn btn-primary" disabled="@(MqttService.Connected)" @onclick="Connect">Connect</button>
-<button type="button" class="btn btn-secondary" disabled="@(!MqttService.Connected)" @onclick="DisconnectAsync">Disconnect</button>
+<button type="button" class="button is-primary" disabled="@(MqttService.Connected)" @onclick="Connect">Connect</button>
+<button type="button" class="button" disabled="@(!MqttService.Connected)" @onclick="DisconnectAsync">Disconnect</button>
 
 @code {
 

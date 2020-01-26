@@ -1,23 +1,25 @@
 @page "/publish"
 @inject IMqttService MqttService
 
-<h1>Publish</h1>
+<h1 class="title">Publish</h1>
 
-<div>
-    <input type="text" placeholder="Topic" @bind="Topic" />
+<div class="field">
+    <div class="control">
+        <input class="input" type="text" placeholder="Topic" @bind="Topic" />
+    </div>
 </div>
-
-<div>
-    <textarea placeholder="Payload" @bind="Payload" />
+<div class="field">
+    <div class="control">
+        <textarea class="textarea" placeholder="Payload" @bind="Payload" />
+    </div>
 </div>
-
-<button @onclick="PublishAsync" disabled="@(Sending)">
-    @if (Sending)
-    {
-        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
-    }
-    Publish
-</button>
+<div class="field">
+    <div class="control">
+        <button class="button is-primary @(Sending ? "is-loading" : "")" @onclick="PublishAsync">
+            Publish
+        </button>
+    </div>
+</div>
 
 @code
 {

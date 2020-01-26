@@ -3,19 +3,27 @@
 @inject IMqttService MqttService
 @implements IDisposable
 
-<h1>Subscribe</h1>
+<h1 class="title">Subscribe</h1>
 
-<input type="text" placeholder="Topic" @bind="NewTopic" />
-<button @onclick="SubscribeNewTopicAsync">Subscribe</button>
+<div class="field">
+    <div class="control">
+        <input class="input" type="text" placeholder="Topic" @bind="NewTopic" />
+    </div>
+</div>
+<div class="field">
+    <div class="control">
+        <button class="button is-primary" @onclick="SubscribeNewTopicAsync">Subscribe</button>
+    </div>
+</div>
 
-<h2>Received messages</h2>
+<h1 class="title">Received messages</h1>
 
-<table class="table table-sm table-hover">
+<table class="table is-narrow is-hoverable is-fullwidth">
     <thead>
         <tr>
-            <th scope="col">#</th>
-            <th scope="col">Topic</th>
-            <th scope="col">Timestamp</th>
+            <th>#</th>
+            <th>Topic</th>
+            <th>Timestamp</th>
         </tr>
     </thead>
     <tbody>

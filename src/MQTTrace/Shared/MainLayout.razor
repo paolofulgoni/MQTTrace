@@ -1,15 +1,14 @@
 @inherits LayoutComponentBase
 
-<div class="sidebar">
-    <NavMenu />
-</div>
-
-<div class="main">
-    <div class="top-row px-4">
-        <a href="https://github.com/paolofulgoni/MQTTrace" target="_blank">About</a>
+<nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="https://github.com/paolofulgoni/MQTTrace">
+            MQTTrace
+        </a>
     </div>
+</nav>
 
-    <div class="content px-4">
-        @Body
-    </div>
-</div>
+<section class="section">
+    @Body
+</section>
+
