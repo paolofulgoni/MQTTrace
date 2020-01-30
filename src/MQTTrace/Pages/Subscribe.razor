@@ -64,7 +64,7 @@ Content: @(SelectedMessage != null ? Encoding.UTF8.GetString(SelectedMessage.Mes
         MqttService.MessageReceived += ReloadMessages;
     }
 
-    private async Task ReloadMessages()
+    private async Task ReloadMessages(ReceivedMessage receivedMessage)
     {
         await InvokeAsync(() =>
         {

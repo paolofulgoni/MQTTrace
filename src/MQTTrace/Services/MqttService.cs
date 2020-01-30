@@ -17,7 +17,7 @@ namespace MQTTrace.Services
         bool Connected { get; }
         Task SubscribeAsync(string topic);
         List<ReceivedMessage> ReceivedMessages { get; }
-        event Func<Task> MessageReceived;
+        event Func<ReceivedMessage, Task> MessageReceived;
         Task PublishAsync(string topic, string payload);
 
     }
@@ -59,21 +59,27 @@ namespace MQTTrace.Services
 
         public List<ReceivedMessage> ReceivedMessages { get; } = new List<ReceivedMessage>();
 
-        private void HandleApplicationMessagereceived(MqttApplicationMessageReceivedEventArgs args)
+        private async Task HandleApplicationMessagereceived(MqttApplicationMessageReceivedEventArgs args)
         {
             var messageId = Interlocked.Increment(ref lastMessageId);
 
-            ReceivedMessages.Add(new ReceivedMessage
+            var receivedMessage = new ReceivedMessage
             {
                 MessageId = messageId,
                 Timestamp = DateTime.Now,
                 ClientId = args.ClientId,
                 Message = args.ApplicationMessage,
-            });
-            MessageReceived?.Invoke();
+            };
+
+            ReceivedMessages.Add(receivedMessage);
+
+            if (MessageReceived != null)
+            {
+                await MessageReceived.Invoke(receivedMessage);
+            }
         }
 
-        public event Func<Task> MessageReceived;
+        public event Func<ReceivedMessage, Task> MessageReceived;
 
         public async Task PublishAsync(string topic, string payload)
         {
