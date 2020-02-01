@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Client.Connecting;
+using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTrace.Models;
 
@@ -15,6 +17,7 @@ namespace MQTTrace.Services
         Task ConnectAsync();
         Task DisconnectAsync();
         bool Connected { get; }
+        event Func<Task> ConnectionStateChanged;
         Task SubscribeAsync(string topic);
         List<ReceivedMessage> ReceivedMessages { get; }
         event Func<ReceivedMessage, Task> MessageReceived;
@@ -31,6 +34,8 @@ namespace MQTTrace.Services
         {
             this.mqttClient = mqttClient;
 
+            mqttClient.UseConnectedHandler(HandleConnection);
+            mqttClient.UseDisconnectedHandler(HandleDisconnection);
             mqttClient.UseApplicationMessageReceivedHandler(HandleApplicationMessagereceived);
         }
 
@@ -51,6 +56,24 @@ namespace MQTTrace.Services
         }
 
         public bool Connected => mqttClient.IsConnected;
+
+        private async Task HandleConnection(MqttClientConnectedEventArgs arg)
+        {
+            if (ConnectionStateChanged != null)
+            {
+                await ConnectionStateChanged.Invoke();
+            }
+        }
+
+        private async Task HandleDisconnection(MqttClientDisconnectedEventArgs arg)
+        {
+            if (ConnectionStateChanged != null)
+            {
+                await ConnectionStateChanged.Invoke();
+            }
+        }
+
+        public event Func<Task> ConnectionStateChanged;
 
         public async Task SubscribeAsync(string topic)
         {

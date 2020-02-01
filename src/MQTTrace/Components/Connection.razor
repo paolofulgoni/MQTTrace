@@ -1,18 +1,64 @@
 @inject IMqttService MqttService
+@implements IDisposable
 
-<button type="button" class="button is-primary" disabled="@(MqttService.Connected)" @onclick="Connect">Connect</button>
-<button type="button" class="button" disabled="@(!MqttService.Connected)" @onclick="DisconnectAsync">Disconnect</button>
+<button type="button" class="button is-primary @(Connecting ? "is-loading" : "")" disabled="@(Connected)" @onclick="ConnectAsync">Connect</button>
+<button type="button" class="button @(Disconnecting ? "is-loading" : "")" disabled="@(!Connected)" @onclick="DisconnectAsync">Disconnect</button>
 
 @code {
 
-    public async Task Connect()
+    public bool Connecting { get; set; } = false;
+
+    public bool Disconnecting { get; set; } = false;
+
+    public bool Connected { get; set; }
+
+
+    protected override void OnInitialized()
     {
-        await MqttService.ConnectAsync();
+        Connected = MqttService.Connected;
+
+        MqttService.ConnectionStateChanged += HandleConnectionStateChanged;
+    }
+
+    private async Task HandleConnectionStateChanged()
+    {
+        await InvokeAsync(() =>
+        {
+            Connected = MqttService.Connected;
+            StateHasChanged();
+        });
+    }
+
+    public async Task ConnectAsync()
+    {
+        Connecting = true;
+
+        try
+        {
+            await MqttService.ConnectAsync();
+        }
+        finally
+        {
+            Connecting = false;
+        }
     }
 
     public async Task DisconnectAsync()
     {
-        await MqttService.DisconnectAsync();
+        Disconnecting = true;
+
+        try
+        {
+            await MqttService.DisconnectAsync();
+        }
+        finally
+        {
+            Disconnecting = false;
+        }
     }
 
+    public void Dispose()
+    {
+        MqttService.ConnectionStateChanged -= HandleConnectionStateChanged;
+    }
 }

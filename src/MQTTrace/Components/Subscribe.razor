@@ -9,7 +9,7 @@
 </div>
 <div class="field">
     <div class="control">
-        <button class="button is-primary" @onclick="SubscribeNewTopicAsync">Subscribe</button>
+        <button class="button is-primary @(Subscribing ? "is-loading" : "")" disabled="@(!Connected)" @onclick="SubscribeNewTopicAsync">Subscribe</button>
     </div>
 </div>
 
@@ -41,15 +41,27 @@ Content: @(SelectedMessage != null ? Encoding.UTF8.GetString(SelectedMessage.Mes
 
 @code
 {
+    public bool Connected { get; set; }
+
     public string NewTopic { get; set; }
 
     public List<ReceivedMessage> Messages { get; private set; }
 
     public ReceivedMessage SelectedMessage = null;
 
+    public bool Subscribing { get; set; }
+
     public async Task SubscribeNewTopicAsync()
     {
-        await MqttService.SubscribeAsync(NewTopic);
+        Subscribing = true;
+        try
+        {
+            await MqttService.SubscribeAsync(NewTopic);
+        }
+        finally
+        {
+            Subscribing = false;
+        }
     }
 
     protected override void OnInitialized()
@@ -58,7 +70,17 @@ Content: @(SelectedMessage != null ? Encoding.UTF8.GetString(SelectedMessage.Mes
                 .TakeLast(10)
                 .ToList();
 
+        MqttService.ConnectionStateChanged += HandleConnectionStateChanged;
         MqttService.MessageReceived += ReloadMessages;
+    }
+
+    private async Task HandleConnectionStateChanged()
+    {
+        await InvokeAsync(() =>
+        {
+            Connected = MqttService.Connected;
+            StateHasChanged();
+        });
     }
 
     private async Task ReloadMessages(ReceivedMessage receivedMessage)
@@ -81,6 +103,7 @@ Content: @(SelectedMessage != null ? Encoding.UTF8.GetString(SelectedMessage.Mes
 
     public void Dispose()
     {
+        MqttService.ConnectionStateChanged -= HandleConnectionStateChanged;
         MqttService.MessageReceived -= ReloadMessages;
     }
 }
