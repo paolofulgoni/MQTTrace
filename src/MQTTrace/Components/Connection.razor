@@ -1,4 +1,3 @@
-@page "/connection"
 @inject IMqttService MqttService
 
 <button type="button" class="button is-primary" disabled="@(MqttService.Connected)" @onclick="Connect">Connect</button>
