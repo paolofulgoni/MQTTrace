@@ -11,7 +11,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var message in Messages)
+        @foreach (var message in MessagesOnCurrentPage)
         {
             <tr @onclick="@(e => UpdateSelectedMessage(e, message.MessageId))">
                 <th scope="row">@(message.MessageId)</th>
@@ -22,45 +22,73 @@
     </tbody>
 </table>
 
-<h2>Selected message details</h2>
-
-Content: @(SelectedMessage != null ? Encoding.UTF8.GetString(SelectedMessage.Message.Payload) : "")
+@if (SelectedMessage != null)
+{
+    <div class="modal @(MessageCardActive ? "is-active" : "")">
+        <div class="modal-background" @onclick="CloseMessageCard"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Message #@(SelectedMessage.MessageId)</p>
+                <button class="delete" aria-label="close" @onclick="CloseMessageCard"></button>
+            </header>
+            <section class="modal-card-body">
+                Content: @(SelectedMessage != null ? Encoding.UTF8.GetString(SelectedMessage.Message.Payload) : "")
+            </section>
+            <footer class="modal-card-foot">
+                <!-- TODO: add prev/next buttons-->
+            </footer>
+        </div>
+    </div>
+}
 
 @code
 {
-    public List<ReceivedMessage> Messages { get; private set; }
+    public List<ReceivedMessage> MessagesOnCurrentPage { get; set; }
 
-    public ReceivedMessage SelectedMessage = null;
+    public ReceivedMessage SelectedMessage { get; set; } = null;
+
+    public bool MessageCardActive { get; set; } = false;
 
     protected override void OnInitialized()
     {
-        Messages = MqttService.ReceivedMessages
-                .TakeLast(10)
-                .ToList();
+        LoadMessageOnCurrentPage();
 
-        MqttService.MessageReceived += ReloadMessages;
+        MqttService.MessageReceived += MessageReceivedHandler;
     }
 
-    private async Task ReloadMessages(ReceivedMessage receivedMessage)
+    private async Task MessageReceivedHandler(ReceivedMessage receivedMessage)
     {
         await InvokeAsync(() =>
         {
-            Messages = MqttService.ReceivedMessages
-                .TakeLast(10)
-                .ToList();
+            LoadMessageOnCurrentPage();
 
             StateHasChanged();
 
         });
     }
 
+    private void LoadMessageOnCurrentPage()
+    {
+        MessagesOnCurrentPage = MqttService.ReceivedMessages
+            .TakeLast(20)
+            .Reverse()
+            .ToList();
+    }
+
     private void UpdateSelectedMessage(MouseEventArgs e, int messageId)
     {
-        SelectedMessage = Messages.Find(m => m.MessageId == messageId);
+        SelectedMessage = MessagesOnCurrentPage.Find(m => m.MessageId == messageId);
+        
+        MessageCardActive = true;
+    }
+
+    private void CloseMessageCard(MouseEventArgs e)
+    {
+        MessageCardActive = false;
     }
 
     public void Dispose()
     {
-        MqttService.MessageReceived -= ReloadMessages;
+        MqttService.MessageReceived -= MessageReceivedHandler;
     }
 }
