@@ -1,4 +1,3 @@
-@using System.Text
 @inject IMqttService MqttService
 @implements IDisposable
 
@@ -13,41 +12,11 @@
     </div>
 </div>
 
-<h1 class="title">Received messages</h1>
-
-<table class="table is-narrow is-hoverable is-fullwidth">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Topic</th>
-            <th>Timestamp</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var message in Messages)
-        {
-            <tr @onclick="@(e => UpdateSelectedMessage(e, message.MessageId))">
-                <th scope="row">@(message.MessageId)</th>
-                <td>@(message.Message.Topic)</td>
-                <td>@(message.Timestamp)</td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<h2>Selected message details</h2>
-
-Content: @(SelectedMessage != null ? Encoding.UTF8.GetString(SelectedMessage.Message.Payload) : "")
-
 @code
 {
     public bool Connected { get; set; }
 
     public string NewTopic { get; set; }
-
-    public List<ReceivedMessage> Messages { get; private set; }
-
-    public ReceivedMessage SelectedMessage = null;
 
     public bool Subscribing { get; set; }
 
@@ -66,12 +35,7 @@ Content: @(SelectedMessage != null ? Encoding.UTF8.GetString(SelectedMessage.Mes
 
     protected override void OnInitialized()
     {
-        Messages = MqttService.ReceivedMessages
-                .TakeLast(10)
-                .ToList();
-
         MqttService.ConnectionStateChanged += HandleConnectionStateChanged;
-        MqttService.MessageReceived += ReloadMessages;
     }
 
     private async Task HandleConnectionStateChanged()
@@ -83,27 +47,8 @@ Content: @(SelectedMessage != null ? Encoding.UTF8.GetString(SelectedMessage.Mes
         });
     }
 
-    private async Task ReloadMessages(ReceivedMessage receivedMessage)
-    {
-        await InvokeAsync(() =>
-        {
-            Messages = MqttService.ReceivedMessages
-                .TakeLast(10)
-                .ToList();
-
-            StateHasChanged();
-
-        });
-    }
-
-    private void UpdateSelectedMessage(MouseEventArgs e, int messageId)
-    {
-        SelectedMessage = Messages.Find(m => m.MessageId == messageId);
-    }
-
     public void Dispose()
     {
         MqttService.ConnectionStateChanged -= HandleConnectionStateChanged;
-        MqttService.MessageReceived -= ReloadMessages;
     }
 }
