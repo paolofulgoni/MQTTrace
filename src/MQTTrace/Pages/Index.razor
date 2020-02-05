@@ -1,11 +1,11 @@
 @page "/"
 
 
-<div class="tile is-ancestor">
-    <div class="tile">
-        <div class="tile is-vertical">
-            <div class="tile is-parent">
-                <div class="tile is-child card">
+<div class="columns">
+    <div class="column">
+        <div class="columns">
+            <div class="column">
+                <div class="card">
                     <header class="card-header">
                         <p class="card-header-title">Connection</p>
                     </header>
@@ -14,8 +14,10 @@
                     </div>
                 </div>
             </div>
-            <div class="tile is-parent">
-                <div class="tile is-child card">
+        </div>
+        <div class="columns">
+            <div class="column">
+                <div class="card">
                     <header class="card-header">
                         <p class="card-header-title">Publish</p>
                     </header>
@@ -23,9 +25,12 @@
                         <Publish></Publish>
                     </div>
                 </div>
+
             </div>
-            <div class="tile is-parent">
-                <div class="tile is-child card">
+        </div>
+        <div class="columns">
+            <div class="column">
+                <div class="card">
                     <header class="card-header">
                         <p class="card-header-title">Subscribe</p>
                     </header>
@@ -35,15 +40,16 @@
                 </div>
             </div>
         </div>
-        <div class="tile is-parent">
-            <div class="tile is-child card">
-                <header class="card-header">
-                    <p class="card-header-title">Received messages</p>
-                </header>
-                <div class="card-content">
-                    <Inbox></Inbox>
-                </div>
+    </div>
+    <div class="column">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">Received messages</p>
+            </header>
+            <div class="card-content">
+                <Inbox></Inbox>
             </div>
         </div>
+
     </div>
 </div>
