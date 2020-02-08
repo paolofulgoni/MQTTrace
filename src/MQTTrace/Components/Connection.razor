@@ -1,10 +1,31 @@
 @inject IMqttService MqttService
+@inject IUserSettingsService UserSettingsService
 @implements IDisposable
 
-<button type="button" class="button is-primary @(Connecting ? "is-loading" : "")" disabled="@(Connected)" @onclick="ConnectAsync">Connect</button>
-<button type="button" class="button @(Disconnecting ? "is-loading" : "")" disabled="@(!Connected)" @onclick="DisconnectAsync">Disconnect</button>
+<div class="field is-grouped">
+    <div class="control">
+        <div class="select">
+            <select @bind="SelectedConnectionProfileId">
+                @foreach (var connectionProfile in ConnectionProfiles)
+                {
+                    <option value="@connectionProfile.ConnectionProfileId">@connectionProfile.ProfileName</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="control">
+        <button type="button" class="button is-primary @(Connecting ? "is-loading" : "")" disabled="@(Connected)" @onclick="ConnectAsync">Connect</button>
+    </div>
+    <div class="control">
+        <button type="button" class="button @(Disconnecting ? "is-loading" : "")" disabled="@(!Connected)" @onclick="DisconnectAsync">Disconnect</button>
+    </div>
+</div>
 
 @code {
+
+    public List<ConnectionProfile> ConnectionProfiles { get; set; }
+
+    public int SelectedConnectionProfileId { get; set; }
 
     public bool Connecting { get; set; } = false;
 
@@ -16,6 +37,8 @@
     protected override void OnInitialized()
     {
         Connected = MqttService.Connected;
+        ConnectionProfiles = UserSettingsService.GetConnectionProfiles();
+        SelectedConnectionProfileId = ConnectionProfiles[0].ConnectionProfileId;
 
         MqttService.ConnectionStateChanged += HandleConnectionStateChanged;
     }
@@ -35,7 +58,8 @@
 
         try
         {
-            await MqttService.ConnectAsync();
+            var selectedConnectionProfile = ConnectionProfiles.Find(p => p.ConnectionProfileId == SelectedConnectionProfileId);
+            await MqttService.ConnectAsync(selectedConnectionProfile.ClientOptions);
         }
         finally
         {

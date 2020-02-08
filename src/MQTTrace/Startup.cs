@@ -29,6 +29,7 @@ namespace MQTTrace
         {
             services.AddScoped<IMqttClient>(_ => new MqttFactory().CreateMqttClient());
             services.AddScoped<IMqttService, MqttService>();
+            services.AddScoped<IUserSettingsService, UserSettingsService>();
 
             services.AddRazorPages();
             services.AddServerSideBlazor();

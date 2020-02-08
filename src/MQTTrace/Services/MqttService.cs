@@ -14,7 +14,7 @@ namespace MQTTrace.Services
 {
     public interface IMqttService
     {
-        Task ConnectAsync();
+        Task ConnectAsync(IMqttClientOptions clientOptions);
         Task DisconnectAsync();
         bool Connected { get; }
         event Func<Task> ConnectionStateChanged;
@@ -39,15 +39,9 @@ namespace MQTTrace.Services
             mqttClient.UseApplicationMessageReceivedHandler(HandleApplicationMessagereceived);
         }
 
-        public async Task ConnectAsync()
+        public async Task ConnectAsync(IMqttClientOptions clientOptions)
         {
-            var mqttClientOptions = new MqttClientOptionsBuilder()
-                .WithClientId("MQTTrace")
-                .WithTcpServer("test.mosquitto.org")
-                .WithCleanSession()
-                .Build();
-
-            await mqttClient.ConnectAsync(mqttClientOptions);
+            await mqttClient.ConnectAsync(clientOptions);
         }
 
         public async Task DisconnectAsync()
