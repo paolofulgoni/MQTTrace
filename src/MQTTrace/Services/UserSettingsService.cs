@@ -43,7 +43,7 @@ namespace MQTTrace.Services
                 {
                     ConnectionProfileId = 2,
                     ProfileName = "HiveMQ Public (unencrypted)",
-                    ClientOptions = mosquittoTestUnencryptedV5,
+                    ClientOptions = hiveMqPublicUnencryptedV5,
                 }
             };
         }
