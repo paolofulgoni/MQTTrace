@@ -1,5 +1,146 @@
-TODO
+@using MQTTnet.Client.Options;
+@inject IUserSettingsService UserSettingsService
+
+<div class="section">
+    <div class="control">
+        <div class="select">
+            <select @onchange="SelectedProfileChaged">
+                <option selected></option>
+                @foreach (var connectionProfile in ConnectionProfiles)
+                {
+                    <option value="@connectionProfile.ConnectionProfileId">@connectionProfile.ProfileName</option>
+                }
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <h2 class="subtitle">
+        <span class="icon is-small"><i class="fas fa-plug" aria-hidden="true"></i></span>
+        <span>Basics</span>
+    </h2>
+    <div class="field">
+        <label class="label">Address</label>
+        <div class="control">
+            <input class="input is-short" type="text" @bind="Address">
+        </div>
+    </div>
+    <div class="field">
+        <label class="label">Port</label>
+        <div class="control">
+            <input class="input is-short" type="text" @bind="Port">
+        </div>
+    </div>
+    <div class="field">
+        <label class="label">Client ID</label>
+        <div class="control">
+            <input class="input is-short" type="text" @bind="ClientId">
+        </div>
+    </div>
+    <div class="field">
+        <label class="label">Clean session</label>
+        <div class="control">
+            <label class="checkbox">
+                <input type="checkbox" @bind="CleanSession">
+            </label>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <h2 class="subtitle">
+        <span class="icon is-small"><i class="fas fa-sliders-h" aria-hidden="true"></i></span>
+        <span>Advanced</span>
+    </h2>
+    <div class="field">
+        <label class="label">Connection Timeout</label>
+        <div class="control">
+            <input class="input is-short" type="text" @bind="ConnectionTimeout">
+        </div>
+    </div>
+    <div class="field">
+        <label class="label">Keep Alive Period</label>
+        <div class="control">
+            <input class="input is-short" type="text" @bind="KeepAlivePeriod">
+        </div>
+    </div>
+    <div class="field">
+        <label class="label">Protocol Version</label>
+        <div class="control">
+            <div class="select">
+                <select @bind="ProtocolVersion">
+                    @foreach (var protocolVersion in MqttProtocolVersions)
+                    {
+                        <option value="@protocolVersion.Key">@protocolVersion.Value</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
 
+    public Dictionary<int, string> MqttProtocolVersions = new Dictionary<int, string>
+    {
+        { 3, "3.1.0" },
+        { 4, "3.1.1" },
+        { 5, "5.0.0" },
+    };
+
+    public List<ConnectionProfile> ConnectionProfiles { get; set; }
+
+    public ConnectionProfile SelectedConnectionProfile { get; set; }
+
+    public string Address { get; set; }
+
+    public int? Port { get; set; }
+
+    public string ClientId { get; set; }
+
+    public bool CleanSession { get; set; }
+
+    public int? ConnectionTimeout { get; set; }
+
+    public int? KeepAlivePeriod { get; set; }
+
+    public int ProtocolVersion { get; set; }
+
+    protected override void OnInitialized()
+    {
+        ConnectionProfiles = UserSettingsService.GetConnectionProfiles();
+    }
+
+    public void SelectedProfileChaged(ChangeEventArgs e)
+    {
+        if (e.Value == null || e.ToString() == "")
+        {
+            SelectedConnectionProfile = null;
+
+            Address = null;
+            Port = null;
+            ClientId = null;
+            CleanSession = false;
+            ConnectionTimeout = null;
+            KeepAlivePeriod = null;
+            ProtocolVersion = 5;
+        }
+        else
+        {
+            var selectedConnectionProfileId = int.Parse(e.Value.ToString());
+            SelectedConnectionProfile = ConnectionProfiles.Find(p => p.ConnectionProfileId == selectedConnectionProfileId);
+
+            var options = SelectedConnectionProfile.ClientOptions as MqttClientOptions;
+            var tcpOptions = SelectedConnectionProfile.ClientOptions.ChannelOptions as MqttClientTcpOptions;
+
+            Address = tcpOptions.Server;
+            Port = tcpOptions.Port;
+            ClientId = options.ClientId;
+            CleanSession = options.CleanSession;
+            ConnectionTimeout = (int)options.CommunicationTimeout.TotalSeconds;
+            KeepAlivePeriod = (int)options.KeepAlivePeriod.TotalSeconds;
+            ProtocolVersion = (int)options.ProtocolVersion;
+        }
+    }
 }
